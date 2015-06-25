@@ -6,6 +6,8 @@ Inspired by OpenBSD's [signify](http://cvsweb.openbsd.org/cgi-bin/cvsweb/src/usr
 Currently, this programme is a superset of minisign (and so partially signify) but in the future signatures and or keys may become incompatible -- it seemed in bad taste to do that immediately.
 
 ## Usage
+Compile it and run `msr --help` and you'll find
+
       -G, --generate[=FILE]      Generate a new key pair, storing in
                                  `FILE.{pub,key}' (FILE defaults to msr)
       -S, --sign-detached=FILE   Sign FILE by generating a separate signature
@@ -32,7 +34,7 @@ Currently, this programme is a superset of minisign (and so partially signify) b
           --usage                Give a short usage message
           --version              Print program version
 
-## File specifications
+## Specifications
 
 At the behest of libsodium, we use [ed25519](http://ed25519.cr.yp.to/) for all things signing, `scryptsalsa208sha256` for the KDF, and [BLAKE2](https://blake2.net/) for computing hashes otherwise. Thus, for what follows we have
 
@@ -42,7 +44,7 @@ At the behest of libsodium, we use [ed25519](http://ed25519.cr.yp.to/) for all t
 
 Finally, to minimise key collisions and provide a convenient necessary match criterion, each key is assigned a `key_id` which is eight random bytes.
 
-### Secret Key
+### Secret Key Files
     untrusted comment: <1024 bytes, arbitrarily changeable>
     base64( <sig_alg> || <kdf_alg> || <chk_alg> || <kdf_salt> || <kdf_opsl> || <kdf_meml> || <encrypted key> )
 
@@ -52,11 +54,11 @@ where
 * `checksum = BLAKE2( <sig_alg> || <key id> || <secret key)`
 * `encrypted key = <kdf output> ^ (<key id> || <secret key> || <checksum>)`
 
-### Public Key
+### Public Key Files
     untrusted comment: <1024 bytes, arbitrarily changeable>
     base64( <signature algorithm> || <key id> || <public key> )
 
-### Signature
+### Signatures
 Detached signatures have the format
 
     untrusted comment: <1024 bytes, arbitrarily changeable>
@@ -82,5 +84,7 @@ I doubt it's *that* portable, but it should probably work on most unix-y systems
 ### License
 GPL3+
 
-### Motivation
-The idea that you can squeeze public key verification into just a few bytes (sub ~100 for everything concerned) and have it still be "128 bit strong" is really amazing. Moreover, I felt that this would be a good learning exercise -- I haven't really done much library interfacing in C and this project entailed two (libsodium and argp), and I haven't ever concluded a mid-sized C project before. I have no doubt the code is crufty and poorly designed, but I had fun and it was an interesting paradigm shift from my usual language of choice.
+### Author's notes
+The idea that you can squeeze public key verification into just a few bytes (sub ~100 for everything concerned) and have it still be "128 bit strong" is really amazing. Moreover, I felt that this would be a good learning exercise -- I haven't really done much library interfacing in C (this project entailed using both libsodium and argp), and I haven't ever concluded a mid-sized C project before. I have no doubt the code is crufty and poorly designed, but I had fun and it was an interesting paradigm shift from my usual language of choice.
+
+All input welcome and desired!
