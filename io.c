@@ -37,8 +37,11 @@ Error read_password_stdin(uint8_t * passwd, char repeat, size_t *len) {
   }
   // If we were interactive then we don't want the terminal return
   size_t k = strnlen((char*)passwd,MAX_PASS_LEN);
-  if (k==0) puts("(blank)");
-  else if (passwd[k-1]=='\n') passwd[--k]=0;
+  if (k==1) puts("(blank)");
+  else {
+    putchar('\n');
+    if (passwd[k-1]=='\n') passwd[--k]=0;
+  }
   // Are we asking the user to repeat the password?
   if (repeat) {
     // Reset terminal settings in the event that we die when allocating
@@ -50,6 +53,7 @@ Error read_password_stdin(uint8_t * passwd, char repeat, size_t *len) {
     tcsetattr(STDIN_FILENO,TCSANOW,&noecho);
     // Read in, if this one is blank they must both be for a match
     if ( fgets((char*)passwd2,MAX_PASS_LEN,stdin) == NULL) {
+      tcsetattr(STDIN_FILENO,TCSANOW,&old);    
       putchar('\n');
       sodium_free(passwd2);
       sodium_free(passwd);
@@ -59,8 +63,11 @@ Error read_password_stdin(uint8_t * passwd, char repeat, size_t *len) {
     tcsetattr(STDIN_FILENO,TCSANOW,&old);
     size_t k2 = strnlen((char*)passwd2,MAX_PASS_LEN);
     // Trim this one too
-    if (k2 == 0) puts("(blank)");
-    else if (passwd2[k2-1]=='\n') passwd2[--k2]=0;
+    if (k2 == 1) puts("(blank)");
+    else {
+      putchar('\n');
+      if (passwd2[k2-1]=='\n') passwd2[--k2]=0;
+    }
     // They must be of the same length (note: both taken with possible terminal return)
     if (k2 != k) {
       sodium_memzero(passwd,MAX_PASS_LEN);
