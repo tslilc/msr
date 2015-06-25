@@ -1,0 +1,4 @@
+*.o
+msr
+*.pub
+*.key
